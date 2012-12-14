@@ -1,0 +1,7 @@
+places:
+  - project-version
+  - dependency-version
+  - parent-version
+
+exclusions:
+  - test-common
