@@ -1,0 +1,9 @@
+<project>
+    <groupId>group</groupId>
+    <artifactId>module-2-artifact</artifactId>
+    <parent>
+        <groupId>group</groupId>
+        <artifactId>main-module</artifactId>
+        <version>0</version>
+    </parent>
+</project>

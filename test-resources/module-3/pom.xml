@@ -1,0 +1,13 @@
+<project>
+    <groupId>group</groupId>
+    <artifactId>module-3-artifact</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>group</groupId>
+            <artifactId>module-2-artifact</artifactId>
+            <version>0</version>
+        </dependency>
+    </dependencies>
+</project>
+

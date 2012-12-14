@@ -1,0 +1,14 @@
+<project>
+    <groupId>group</groupId>
+    <artifactId>main-module</artifactId>
+    <version>0</version>
+    <modules>
+        <!-- Comment -->
+        <!-- Comment 2 -->
+        <module>module-1</module>
+
+
+        <module>module-2</module>
+        <module>module-3</module>
+    </modules>
+</project>

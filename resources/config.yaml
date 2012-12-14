@@ -1,7 +1,11 @@
-places:
-  - project-version
-  - dependency-version
-  - parent-version
+config:
+  root: test-resources
+  overwrite: false
+  backup-suffix: .bak
+  new-suffix: .new
+
+places: [project, dependency, parent]
 
 exclusions:
-  - test-common
+  - group/test-common
+  - plain-name
