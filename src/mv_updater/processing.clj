@@ -24,6 +24,8 @@
         submodule-file (io/file pom-dir submodule-name "pom.xml")]
     submodule-file))
 
+;; TODO: create parent artifact name finding function
+
 (defn find-submodule-names
   "Returns names of all submodules of given pom. Submodules are defined like this:
   <project>
@@ -46,12 +48,53 @@
   </project>
   So, for the XML above this function will return \"artifact-name\"."
   [pom]
-  (zx/xml1-> pom :artifactId zx/text))
+  {:name (zx/xml1-> pom :artifactId zx/text)
+   :group (zx/xml1-> pom :groupId zx/text)})
+
+(defn get-project-version-node
+  [pom]
+  (zx/xml1-> pom :version))
+
+(defn get-project-version
+  [pom]
+  (-> pom get-project-version-node zx/text))
+
+(defn get-parent-version-node
+  [pom]
+  (zx/xml1-> pom :parent :version))
+
+(defn get-parent-version
+  [pom]
+  (-> pom get-parent-version-node zx/text))
+
+(defn update-project-version
+  "Updates version number in project artifact declaration, if the project artifact name is present in
+  all-module-names list and if it is not excluded in configuration."
+  [pom all-module-names new-version]
+  (let [name (find-this-artifact-name pom)]
+    (if (and
+          (some #{name} all-module-names)
+          (not (c/excluded? name))
+          (get-project-version-node pom))
+      (-> pom
+        get-project-version-node
+        (z/edit assoc :content [new-version])
+        z/up)
+      pom)))
+
+(defn update-parent-version
+  [pom all-module-names new-version])
+
+(defn update-dependencies-versions
+  [pom all-module-names new-version])
 
 (defn update-versions
-  [pom pom-file all-submodule-names new-version]
-  (log/log "Processing" (str "'" pom-file "'"))
-  pom)
+  "Updates version numbers in the given XML tree according to the configuration"
+  [pom all-module-names new-version]
+  (-> pom
+    (update-project-version all-module-names new-version)
+    (update-parent-version all-module-names new-version)
+    (update-dependencies-versions all-module-names new-version)))
 
 (defn collect-submodule-artifact-names
   "Recursively finds artifact names of the given pom and all of its submodules. That is, it finds all submodule names
@@ -85,10 +128,11 @@
   "Processing entry function, walks around pom tree, replacing versions where needed and saving poms back to files.
   Calls itself to recurse deeper in the tree."
   ([pom-file new-version] (process pom-file new-version nil))
-  ([pom-file new-version all-submodule-artifact-names]
+  ([pom-file new-version all-artifact-names]
+    (log/log "Processing" (str "'" pom-file "'"))
     (let [pom (load-xml pom-file)
-          all-submodule-artifact-names
-          (or all-submodule-artifact-names
+          all-artifact-names
+          (or all-artifact-names
             (do
               (log/log "Collecting all submodule artifact names...")
               (doall (map #(do (log/log "Found" %) %) (collect-submodule-artifact-names pom-file)))))
@@ -96,8 +140,8 @@
           submodule-pom-files (map (partial submodule-pom-file pom-file) submodule-names)]
       ; Apply version change in current pom
       (-> pom
-        (update-versions pom-file all-submodule-artifact-names new-version)
+        (update-versions all-artifact-names new-version)
         (save-new-pom pom-file))
       ; Recursively apply version changes in submodules
       (doseq [submodule-pom-file submodule-pom-files]
-        (process submodule-pom-file new-version all-submodule-artifact-names)))))
+        (process submodule-pom-file new-version all-artifact-names)))))

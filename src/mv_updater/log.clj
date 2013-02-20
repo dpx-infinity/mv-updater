@@ -1,7 +1,7 @@
 (ns mv-updater.log)
 
 (def ^{:private true} date-formatter
-  (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss"))
+  (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss.SSS"))
 
 (defn format-date
   [date]

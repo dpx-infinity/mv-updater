@@ -25,6 +25,10 @@
   [place]
   ((:places *config*) place))
 
+(defn excluded?
+  [name]
+  (some #{name} (:exclusions *config*)))
+
 (defn- process-exclusions
   "Converts a seq of strings in form \"group-name/artifact-name\" to the seq of maps in form
   {:name \"artifact-name\" :group \"group-name\"}. If no slash is present in the string, it is used
@@ -32,9 +36,10 @@
   [es]
   (->> es
     (map #(st/split % #"/" 2))
-    (map (fn [[p1 p2]] (if p2 {:group p1 :name p2} {:group p1 :name p1})))))
+    (map (fn [[p1 p2]] {:group p1 :name (or p2 p1)}))))
 
 (defn load-config
+  "Loads configuration file from a file designated by file-name."
   [file-name]
   (try
     (let [cfg (-> (slurp file-name) (y/parse-string))]

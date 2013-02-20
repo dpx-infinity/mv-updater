@@ -4,6 +4,9 @@
                  [org.clojure/data.xml "0.0.5"]
                  [clj-yaml "0.4.0"]
                  [commons-io "2.4"]]
+
+  :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.5"]]}}
+
   :exclusions [org.clojure/clojure]
 
   :aot :all
